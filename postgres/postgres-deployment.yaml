@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:10.1
+          imagePullPolicy: "IfNotPresent"
+          # Readiness and Liveness Probe
+          readinessProbe:
+            exec:
+              command: [ "psql", "-Uadmin", "-dtrumpet-node-data", "-c", "SELECT 1" ]
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command: [ "psql", "-Uadmin", "-dtrumpet-node-data", "-c", "SELECT 1" ]
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      restartPolicy: Always
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim

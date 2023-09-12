@@ -1,0 +1,84 @@
+---
+# postgres master data configmap volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-master-pv-configmap
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/master
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - minikube # Node Name
+
+---
+# postgres master data volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-data-master-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/master
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - minikube # Node Name
+
+---
+# postgres master data configmap
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-master-configmap
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# postgres master data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-master-data-vol
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# postgres slave data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-slave-data-vol
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

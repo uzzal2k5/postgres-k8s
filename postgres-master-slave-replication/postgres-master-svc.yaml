@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-master
+spec:
+  selector:
+    component: postgres-master
+  ports:
+    - port: 5432
