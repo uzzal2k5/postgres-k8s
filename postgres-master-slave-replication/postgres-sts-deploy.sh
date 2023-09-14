@@ -29,6 +29,15 @@ kubectl apply -f postgres-master-svc.yaml
 kubectl get svc -o wide
 
 
+#Create Replica User
+kubectl exec -it postgres-master-0 -- bash
+su - postgres
+psql
+SET password_encryption = 'scram-sha-256';
+CREATE ROLE repuser WITH REPLICATION PASSWORD 'postgres' LOGIN;
+SELECT * FROM pg_create_physical_replication_slot('replica_1_slot');
+
+
 # Create Data Sync Job (job)
 kubectl apply -f sync-master-data.yaml
 kubectl get job -o wide
@@ -47,34 +56,26 @@ kubectl get pods -o wide
 
 #==========SQL====================
 
-kubectl exec -it postgres-master-0 -- bash
-su - postgres
-psql
-SET password_encryption = 'scram-sha-256';
-CREATE ROLE repuser WITH REPLICATION PASSWORD 'postgres' LOGIN;
-SELECT * FROM pg_create_physical_replication_slot('replica_1_slot');
+
 
 kubectl exec -it postgres-master-0 -- psql -h localhost -U postgres -d postgres
 
 
-CREATE TABLE test (id int not null, val text not null);
-INSERT INTO test VALUES (1, 'foo');
-INSERT INTO test VALUES (2, 'bar');
-INSERT INTO test VALUES (3, 'zoo');
+CREATE TABLE test2 (id int not null, val text not null);
+INSERT INTO test2 VALUES (1, 'foo1');
+INSERT INTO test2 VALUES (2, 'bar2');
+INSERT INTO test2 VALUES (3, 'zoo3');
 
 
 kubectl exec -it postgres-slave-0 -- psql -h localhost -U postgres -d postgres
-select * from test;
-
-
-kubectl exec -it postgres-master-0 -- psql -h localhost -U ${POSTGRES_PASSWORD} -d postgres
-
-POSTGRES_PASSWORD
+select * from test2;
 
 
 
+
+#Dashboad
 minikube dashboard &
-kubectl proxy --address='0.0.0.0' --disable-filter=true
+kubectl proxy --address='0.0.0.0' --disable-filter=true &
 
 http://127.0.0.1:35283/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/
 
