@@ -1,7 +1,12 @@
 
 # Create Credentials ConfigMap (cm)
-kubectl apply -f postgres-credentials-config.yaml
+kubectl apply -f postgres-configmap.yaml
 kubectl get cm -o wide
+
+
+# Create Credentials ConfigMap (cm)
+kubectl apply -f postgres-secret.yaml
+kubectl get secret -o wide
 
 # Create Volume(pv)  and  vVolume Claim (pvc)
 kubectl apply -f postgres-volume.yaml
@@ -55,7 +60,22 @@ kubectl exec -it postgres-master-0 -- psql -h localhost -U postgres -d postgres
 CREATE TABLE test (id int not null, val text not null);
 INSERT INTO test VALUES (1, 'foo');
 INSERT INTO test VALUES (2, 'bar');
+INSERT INTO test VALUES (3, 'zoo');
 
 
 kubectl exec -it postgres-slave-0 -- psql -h localhost -U postgres -d postgres
 select * from test;
+
+
+kubectl exec -it postgres-master-0 -- psql -h localhost -U ${POSTGRES_PASSWORD} -d postgres
+
+POSTGRES_PASSWORD
+
+
+
+minikube dashboard &
+kubectl proxy --address='0.0.0.0' --disable-filter=true
+
+http://127.0.0.1:35283/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/
+
+http://192.168.0.102:8001/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/

@@ -5,5 +5,10 @@ metadata:
 spec:
   selector:
     component: postgres-master
+  type: NodePort
   ports:
-    - port: 5432
+    - name: postgres-master-port
+      port: 5432
+      targetPort: 5432
+      nodePort: 30032
+      protocol: TCP

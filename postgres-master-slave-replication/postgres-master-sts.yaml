@@ -23,11 +23,24 @@ spec:
                 "-c",
                 "docker-entrypoint.sh -c config_file=/var/config/postgresql.conf -c hba_file=/var/config/pg_hba.conf",
             ]
+          # Readiness and Liveness Probe
+          readinessProbe:
+            exec:
+              command: [ "psql", "-Upostgres", "-dpostgres", "-c", "SELECT 1" ]
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command: [ "psql", "-Upostgres", "-dpostgres", "-c", "SELECT 1" ]
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
           ports:
             - containerPort: 5432
           envFrom:
             - configMapRef:
-                name: postgres-credentials
+                name: postgres-configmap
+            - secretRef:
+                name: postgres-secrets
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgres-master-data
