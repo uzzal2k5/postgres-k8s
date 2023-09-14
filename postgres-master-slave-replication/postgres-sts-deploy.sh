@@ -73,7 +73,7 @@ select * from test2;
 
 
 
-#Dashboad
+#Dashboad - RUn this only if you want to expose dashboard to outside of the machine.
 minikube dashboard &
 kubectl proxy --address='0.0.0.0' --disable-filter=true &
 
